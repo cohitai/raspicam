@@ -12,31 +12,27 @@ import paramiko
 import time
 import argparse
 
-
-
 class Camera():
     """camera control class for a raspberrypi web cam. """
-    def __init__(self,ip,path_to_data_directory,port=8080):
+    def __init__(self,ip,path_to_data_directory,pwd,port=8080):
         
         self.ip = ip #camera´s ip address
         self.port = port #camera´s port number
         self.user = 'pi'
-        self.pwd = 'raspberry'
-        self.id = self.ip.split('.')[-1] #serial integer for the camera, taken for the given ip x.x.x.z in the network
+        self.pwd = pwd
+        self.id = str(self.ip.split('.')[-1]) #serial integer for the camera, taken for the given ip x.x.x.z in the network
         self.stream_path = f'http://{self.ip}:{str(self.port)}/?action=streaming' #mjpg- streamer call
         self.path_to_data_directory = path_to_data_directory
         # create logger with 'spam_application'
         logging.getLogger(f'Raspi-application-{self.id}')
         logging.basicConfig(stream=sys.stdout, filemode='a', level=logging.DEBUG)
 
-
-
     def session(self, time):
         
         # ssh connection
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(self.ip, self.port, self.user , self.pwd)
+        ssh.connect(self.ip, 22, self.user , self.pwd)
 
         logging.debug('open-camera-id: {0}'.format(self.id))
         self._open_camera(ssh, sharpness=50, brightness=50, contrast=60, fps=2, res_x=1080, res_y=720,port=self.port)
@@ -45,6 +41,7 @@ class Camera():
         logging.debug('shutdown-camera-id: {0}'.format(self.id))
         self._shut_camera(ssh)
 
+    @staticmethod
     def _open_camera(client, sharpness, brightness, contrast, fps, res_x, res_y, port):
     
         OPEN_CAMERA_CMD = f"mjpg_streamer -i \"input_raspicam.so -br {brightness} -co {contrast} -sh {sharpness} -x {res_x}  -y {res_y}  -fps {fps}\" -o \'output_http.so -p {port}\'"
@@ -57,7 +54,8 @@ class Camera():
             logging.debug(f"sleeping time..: {i}")
 
         return stdin, stdout, stderr
-
+    
+    @staticmethod
     def _shut_camera(client):
 
         """SSH script to end broadcasting on the remote host"""
@@ -71,8 +69,8 @@ class Camera():
                 time.sleep(1)  # bug fix (AttributeError)
                 return stdin, stdout, stderr
 
-
-    def _record_video(length_secs, path_to_stream, path_to_data):
+    
+    def _record_video(self,length_secs, path_to_stream, path_to_data):
         """ function records video
         :param: length_secs: int
                 path_to_stream: string
@@ -93,7 +91,7 @@ class Camera():
                     # decode to colored image
                     i = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
                     datetimeobj = datetime.now()  # get time stamp
-                    cv2.imwrite(path_to_data + '/img' + str(datetimeobj) + '.jpg', i)
+                    cv2.imwrite(path_to_data + "/" + self.id + '_img_' + str(datetimeobj) + '.jpg', i)
                     if cv2.waitKey(1) == 27 or (datetimeobj - time_start).seconds > length_secs:  # if user  hit esc
                         logging.debug('End recording.')
                         break  # exit program

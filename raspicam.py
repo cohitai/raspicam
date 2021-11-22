@@ -18,8 +18,8 @@ class Camera():
     """camera control class for a raspberrypi web cam. """
     def __init__(self,ip,path_to_data_directory,port=8080):
         
-        self.ip = ip #ip address of the camera
-        self.port = port #port number of the camera
+        self.ip = ip #camera´s ip address
+        self.port = port #camera´s port number
         self.user = 'pi'
         self.pwd = 'raspberry'
         self.id = self.ip.split('.')[-1] #serial integer for the camera, taken for the given ip x.x.x.z in the network

@@ -91,7 +91,8 @@ class Camera():
                     # decode to colored image
                     i = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
                     datetimeobj = datetime.now()  # get time stamp
-                    cv2.imwrite(path_to_data + "/" + self.id + '_img_' + str(datetimeobj) + '.jpg', i)
+                    file_name=path_to_data + "/" + self.id + 'img' + str(datetimeobj.timestamp()).replace(".","-") + '.jpg'
+                    cv2.imwrite(file_name.replace("-",""), i)
                     if cv2.waitKey(1) == 27 or (datetimeobj - time_start).seconds > length_secs:  # if user  hit esc
                         logging.debug('End recording.')
                         break  # exit program

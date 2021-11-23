@@ -14,36 +14,50 @@ import argparse
 
 class Camera():
     """camera control class for a raspberrypi web cam. """
-    def __init__(self,ip,path_to_data_directory,pwd,port=8080):
+    def __init__(self,camera_info,path_to_data_directory):
         
-        self.ip = ip #camera´s ip address
-        self.port = port #camera´s port number
+        self.wifi = camera_info["wifi"] #camera´s wifi address
+        self.ethernet = camera_info["ethernet"] #camera´s ethernet address
         self.user = 'pi'
-        self.pwd = pwd
-        self.id = str(self.ip.split('.')[-1]) #serial integer for the camera, taken for the given ip x.x.x.z in the network
-        self.stream_path = f'http://{self.ip}:{str(self.port)}/?action=streaming' #mjpg- streamer call
+        self.pwd = camera_info["pwd"]
         self.path_to_data_directory = path_to_data_directory
+        self.id = None
+        self.stream_path_ = None
+        
         # create logger with 'spam_application'
-        logging.getLogger(f'Raspi-application-{self.id}')
+        logging.getLogger(f'Raspi-application')
         logging.basicConfig(stream=sys.stdout, filemode='a', level=logging.DEBUG)
 
-    def session(self, time):
+    def session(self, time, params):
         
         # ssh connection
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(self.ip, 22, self.user , self.pwd)
 
+        #ethernet first, then wifi.
+        try:
+            ssh.connect(hostname=self.ethernet, username=self.user , password=self.pwd)
+            self.stream_path = f'http://{self.ethernet}:{str(params["port"])}/?action=streaming'
+            self.id = str(self.ethernet.split('.')[-1]) #serial camera identifier
+        except paramiko.ssh_exception.NoValidConnectionsError:
+            ssh.connect(hostname=self.wifi, username=self.user , password=self.pwd)
+            self.stream_path = f'http://{self.wifi}:{str(params["port"])}/?action=streaming'
+            self.id = str(self.wifi.split('.')[-1]) #serial camera identifier
+        except Exception: 
+            raise Exception; "no route to host"
+
+        #camera record session
         logging.debug('open-camera-id: {0}'.format(self.id))
-        self._open_camera(ssh, sharpness=50, brightness=50, contrast=60, fps=2, res_x=1080, res_y=720,port=self.port)
+        self._open_camera(ssh, params)
         logging.debug('record-camera-id: {0}'.format(self.id))
         self._record_video(time, self.stream_path, self.path_to_data_directory)
         logging.debug('shutdown-camera-id: {0}'.format(self.id))
         self._shut_camera(ssh)
 
     @staticmethod
-    def _open_camera(client, sharpness, brightness, contrast, fps, res_x, res_y, port):
-    
+    def _open_camera(client, params):
+        
+        port, sharpness, brightness, contrast, fps, res_x, res_y = params.values()
         OPEN_CAMERA_CMD = f"mjpg_streamer -i \"input_raspicam.so -br {brightness} -co {contrast} -sh {sharpness} -x {res_x}  -y {res_y}  -fps {fps}\" -o \'output_http.so -p {port}\'"
         
         stdin, stdout, stderr = client.exec_command(OPEN_CAMERA_CMD)
@@ -91,8 +105,8 @@ class Camera():
                     # decode to colored image
                     i = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
                     datetimeobj = datetime.now()  # get time stamp
-                    file_name=path_to_data + "/" + self.id + 'img' + str(datetimeobj.timestamp()).replace(".","-") + '.jpg'
-                    cv2.imwrite(file_name.replace("-",""), i)
+                    img_name=path_to_data + "/" + self.id + 'img' + str(datetimeobj.timestamp()).replace(".","-") + '.jpg'
+                    cv2.imwrite(img_name.replace("-",""), i)
                     if cv2.waitKey(1) == 27 or (datetimeobj - time_start).seconds > length_secs:  # if user  hit esc
                         logging.debug('End recording.')
                         break  # exit program

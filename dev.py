@@ -1,7 +1,7 @@
 import raspicam as rp
 import multiprocessing as mlt
 import time
-
+from datetime import datetime
 import os, uuid
 import glob
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
@@ -19,16 +19,16 @@ params = {"port":8080, "sharpness":50, "brightness":50, "contrast":60, "fps":2, 
 #local dir for saving images.
 local_path = "./data"
 
-# function to run with MultiProcessing.
+#function to run with MultiProcessing.
 def cam_run(camera_info):
     cam = rp.Camera(camera_info,local_path)
     cam.session(3,params)
 
 while True:
     start = time.perf_counter()
-
     # Create a unique name for the container.
-    container_name=str(uuid.uuid4())
+    #container_name=str(uuid.uuid4())
+    container_name=str(datetime.now().timestamp()).replace(".","-")
     print("Containers Name: ", container_name)
 
     # Create the container

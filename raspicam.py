@@ -2,15 +2,11 @@ import cv2
 import requests
 import numpy as np
 from datetime import datetime
-import os
 import sys
-import glob
-from pathlib import Path
 import logging
 import re
 import paramiko
 import time
-import argparse
 
 class Camera():
     """camera control class for a raspberrypi web cam. """
@@ -92,21 +88,22 @@ class Camera():
 
         r = requests.get(path_to_stream, stream=True)
         if r.status_code == 200:
-            bytes_loc = bytes()
-            time_start = datetime.now()
+            bytes_loc=bytes()
+            time_start=datetime.now()
             logging.debug(f'Start recording at: {time_start}')
             for chunk in r.iter_content(chunk_size=1024):
-                bytes_loc += chunk
-                a = bytes_loc.find(b'\xff\xd8')  # JPEG start
-                b = bytes_loc.find(b'\xff\xd9')  # JPEG end
+                bytes_loc+=chunk
+                a=bytes_loc.find(b'\xff\xd8')  # JPEG start
+                b=bytes_loc.find(b'\xff\xd9')  # JPEG end
                 if a != -1 and b != -1:
-                    jpg = bytes_loc[a:b + 2]  # actual image
-                    bytes_loc = bytes_loc[b + 2:]  # other information
+                    jpg=bytes_loc[a:b + 2]  # actual image
+                    bytes_loc=bytes_loc[b + 2:]  # other information
                     # decode to colored image
-                    i = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
-                    datetimeobj = datetime.now()  # get time stamp
-                    img_name=path_to_data + "/" + self.id + 'img' + str(datetimeobj.timestamp()).replace(".","-") + '.jpg'
-                    cv2.imwrite(img_name.replace("-",""), i)
+                    i=cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
+                    datetimeobj=datetime.now()  # get time stamp
+                    img_identifier=str((datetimeobj-time_start).seconds)+"-"+str((datetimeobj-time_start).microseconds)[:2]
+                    img_name=path_to_data + "/" + self.id + 'img' + img_identifier+'.jpg'
+                    cv2.imwrite(img_name, i)
                     if cv2.waitKey(1) == 27 or (datetimeobj - time_start).seconds > length_secs:  # if user  hit esc
                         logging.debug('End recording.')
                         break  # exit program

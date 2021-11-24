@@ -6,20 +6,22 @@ import os
 import glob
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
 
+# Docs
+
 # Azure connecting info. 
 os.environ['AZURE_STORAGE_CONNECTION_STRING'] = 'DefaultEndpointsProtocol=https;AccountName=blobsdb;AccountKey=tJK43kihAcaeZMjcegWFcyg8tsFmOr9f2Kn8q6NUinVSJW5O3jymYbjaiGBjmx8Ibq5LsBVPcABvYeV+tUCPnQ==;EndpointSuffix=core.windows.net'
 connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 # Create the BlobServiceClient object which will be used to create a container client.
 blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
-#Camera's sensors info.
+# Camera's sensors info.
 cameras = [{"wifi":"192.168.11.115","ethernet":"10.150.180.52","pwd":"raspberry"},{"wifi":"192.168.11.119","ethernet":"10.150.180.54","pwd":"1234"}]
 params = {"port":8080, "sharpness":50, "brightness":50, "contrast":60, "fps":2, "res_x":1080, "res_y":720}
 
-#local dir for saving images.
+# local dir for saving images.
 local_path = "./data"
 
-#function to run with MultiProcessing.
+# function to run with MultiProcessing.
 def cam_run(camera_info):
     cam = rp.Camera(camera_info,local_path)
     cam.session(3,params)

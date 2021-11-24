@@ -2,7 +2,7 @@ import raspicam as rp
 import multiprocessing as mlt
 import time
 from datetime import datetime
-import os, uuid
+import os
 import glob
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
 
@@ -31,10 +31,10 @@ while True:
     container_name=str(datetime.now().timestamp()).replace(".","-")
     print("Containers Name: ", container_name)
 
-    # Create the container
+    # Create the container.
     container_client = blob_service_client.create_container(container_name)
 
-    # Run cameras on parallel processes
+    # Run cameras on parallel processes.
     processes=[]
     for cam in cameras:
         p=mlt.Process(target=cam_run,args=(cam,))
@@ -47,20 +47,20 @@ while True:
 
     # Commit data to azure
     for img in glob.glob("./data/*.jpg"):
-        # Create a img in the local data directory to upload and download
+        # Create a img in the local data directory to upload and download.
         local_img_name = img.split("/")[-1]
         upload_img_path = os.path.join(local_path, local_img_name)
 
-        # Create a blob client using the local file name as the name for the blob
+        # Create a blob client using the local file name as the name for the blob.
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=local_img_name)
 
         print("\nUploading to Azure Storage as blob:\n\t" + local_img_name)
 
-        # Upload the created img
+        # Upload the created img.
         with open(upload_img_path, "rb") as data:
             blob_client.upload_blob(data)
 
-        # Delete img from local.
+        # Deletes img from local.
         os.remove(img)
 
     print("go to sleep,",finish)

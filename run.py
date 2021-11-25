@@ -18,7 +18,7 @@ blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 #next(blob_service_client.list_containers())
 
 # Camera's sensors info.
-cameras = [{"wifi":"192.168.11.115","ethernet":"10.150.180.52","pwd":"raspberry"},{"wifi":"192.168.11.119","ethernet":"10.150.180.54","pwd":"1234"}]
+cameras = [{"wifi":"192.168.11.115","ethernet":"10.150.180.52","pwd":"1234"},{"wifi":"192.168.11.136","ethernet":"10.150.180.56","pwd":"raspberry"}]
 params = {"port":8080, "sharpness":50, "brightness":50, "contrast":60, "fps":2, "res_x":1080, "res_y":720}
 
 # local dir for saving images.

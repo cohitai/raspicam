@@ -6,5 +6,11 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 ADD . /app
 
+#Create local data directory
+RUN mkdir data
+
 # Install the dependecies
 RUN pip install -r requirements.txt
+
+#Entry
+CMD python run.py

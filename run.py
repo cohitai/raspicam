@@ -29,44 +29,48 @@ def cam_run(camera_info):
     cam = rp.Camera(camera_info,local_path)
     cam.session(3,params)
 
-while True:
-    start = time.perf_counter()
-    # Create a unique name for the container.
-    #container_name=str(uuid.uuid4())
-    container_name=str(datetime.now().timestamp()).replace(".","-")
-    print("Containers Name: ", container_name)
+def main(): 
+    while True:
+        start = time.perf_counter()
+        # Create a unique name for the container.
+        #container_name=str(uuid.uuid4())
+        container_name=str(datetime.now().timestamp()).replace(".","-")
+        print("Containers Name: ", container_name)
 
-    # Create the container.
-    container_client = blob_service_client.create_container(container_name)
+        # Create the container.
+        container_client = blob_service_client.create_container(container_name)
 
-    # Run cameras on parallel processes.
-    processes=[]
-    for cam in cameras:
-        p=mlt.Process(target=cam_run,args=(cam,))
-        p.start()
-        processes.append(p)
-    for p in processes:
-        p.join()
+        # Run cameras on parallel processes.
+        processes=[]
+        for cam in cameras:
+            p=mlt.Process(target=cam_run,args=(cam,))
+            p.start()
+            processes.append(p)
+        for p in processes:
+            p.join()
 
-    finish=time.perf_counter()
+        finish=time.perf_counter()
 
-    # Commit data to azure
-    for img in glob.glob("./data/*.jpg"):
-        # Create a img in the local data directory to upload and download.
-        local_img_name = img.split("/")[-1]
-        upload_img_path = os.path.join(local_path, local_img_name)
+        # Commit data to azure
+        for img in glob.glob("./data/*.jpg"):
+            # Create a img in the local data directory to upload and download.
+            local_img_name = img.split("/")[-1]
+            upload_img_path = os.path.join(local_path, local_img_name)
 
-        # Create a blob client using the local file name as the name for the blob.
-        blob_client = blob_service_client.get_blob_client(container=container_name, blob=local_img_name)
+            # Create a blob client using the local file name as the name for the blob.
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=local_img_name)
 
-        print("\nUploading to Azure Storage as blob:\n\t" + local_img_name)
+            print("\nUploading to Azure Storage as blob:\n\t" + local_img_name)
 
-        # Upload the created img.
-        with open(upload_img_path, "rb") as data:
-            blob_client.upload_blob(data)
+            # Upload the created img.
+            with open(upload_img_path, "rb") as data:
+                blob_client.upload_blob(data)
 
-        # Deletes img from local.
-        os.remove(img)
+            # Deletes img from local.
+            os.remove(img)
 
-    print("go to sleep,",finish)
-    time.sleep(1000)
+        print("go to sleep,",finish)
+        time.sleep(1000)
+
+if __name__ == "__main__":
+    main()

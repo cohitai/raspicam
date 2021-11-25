@@ -1,6 +1,5 @@
 import paramiko
 
-
 #camera's sensors info.
 cameras = [{"wifi":"192.168.11.115","ethernet":"10.150.180.52","pwd":"raspberry"},{"wifi":"192.168.11.119","ethernet":"10.150.180.54","pwd":"1234"}]
 cam1,cam2 = cameras[0],cameras[1]

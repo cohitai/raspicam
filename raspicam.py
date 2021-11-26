@@ -20,9 +20,6 @@ class Camera():
         self.id = None
         self.stream_path_ = None
         
-        # create logger with 'spam_application'
-        logging.getLogger(f'Raspi-application')
-        logging.basicConfig(stream=sys.stdout, filemode='a', level=logging.DEBUG)
 
     def session(self, time, params):
         

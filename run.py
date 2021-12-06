@@ -24,7 +24,7 @@ blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
 # Camera's sensors info.
 cameras = [{"wifi":"192.168.11.115","ethernet":"10.150.180.52","pwd":"1234"}, {"wifi":"192.168.11.136","ethernet":"10.150.180.56","pwd":"raspberry"}]
-params = {"port":8080, "sharpness":50, "brightness":50, "contrast":60, "fps":2, "res_x":1080, "res_y":720}
+params = {"port":8080, "sharpness":50, "brightness":50, "contrast":60, "fps":2, "res_x":640, "res_y":480}
 
 # local dir for saving images.
 local_path = "./data"
@@ -34,7 +34,7 @@ def cam_run(camera_info):
     cam = rp.Camera(camera_info,local_path)
     cam.session(3,params)
 
-def main(): 
+def main():
     while True:
         start = time.perf_counter()
         # Create a unique name for the container.
@@ -75,7 +75,7 @@ def main():
             os.remove(img)
 
         logging.info(f"go to sleep, {finish}")
-        time.sleep(1000)
+        time.sleep(3000)
 
 if __name__ == "__main__":
     main()

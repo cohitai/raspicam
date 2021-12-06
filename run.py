@@ -75,7 +75,7 @@ def main():
             os.remove(img)
 
         logging.info(f"go to sleep, {finish}")
-        time.sleep(3000)
+        time.sleep(3600)
 
 if __name__ == "__main__":
     main()

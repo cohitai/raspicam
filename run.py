@@ -32,7 +32,7 @@ local_path = "./data"
 # function to run with MultiProcessing.
 def cam_run(camera_info):
     cam = rp.Camera(camera_info,local_path)
-    cam.session(3,params)
+    cam.session(28,params)
 
 def main():
     while True:

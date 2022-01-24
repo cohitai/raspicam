@@ -6,6 +6,7 @@ import os,sys
 import glob
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient, __version__
 import logging
+import argparse
 
 # create logger with 'spam_application'
 logging.getLogger(f'Raspi-application')
@@ -22,11 +23,20 @@ blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 #list containers
 #next(blob_service_client.list_containers())
 
+parser = argparse.ArgumentParser(description="Raspicam control.")
+parser.add_argument("-T", "--time", default=29, type=int, help="set recording time")
+parser.add_argument("-B", "--brightness", default=30, type=int, help="camera brightness value")
+parser.add_argument("-S", "--sharpness", default=90, type=int, help="camera sharpness value")
+parser.add_argument("-C", "--contrast", default=70, type=int, help="camera contrast value")
+parser.add_argument("-F", "--fps", default=2, type=float, help="camera fps")
+
+flags = parser.parse_args()
+
 # Camera's sensors info.
 # very good results with sharpness:50, brightness:50, contrast:60, fps:3, res=1080,720, RECORDING_TIME=29
 cameras = [{"wifi":"192.168.11.115","ethernet":"10.150.180.52","pwd":"1234"}, {"wifi":"192.168.11.136","ethernet":"10.150.180.56","pwd":"raspberry"}]
-params = {"port":8080, "sharpness":50, "brightness":50, "contrast":60, "fps":3, "res_x":1080, "res_y":720}
-RECORDING_TIME=29
+params = {"port":8080, "sharpness":flags.sharpness, "brightness":flags.brightness, "contrast":flags.contrast, "fps":flags.fps, "res_x":1080, "res_y":720}
+RECORDING_TIME=flags.time
 # local dir for saving images.
 local_path = "./data"
 
